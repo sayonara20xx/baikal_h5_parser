@@ -1,0 +1,2 @@
+to retrieve all scalar data from dataset, use dataset.[()]
+python3 loop.py --source LiGen --n_events 20 --ligen_macro ligen_e.mac

@@ -1,0 +1,2 @@
+sudo docker run -it git.jinr.ru:5005/baikal/generators:latest
+sudo docker cp relaxed_clarke:/generators/packages/framework/h5

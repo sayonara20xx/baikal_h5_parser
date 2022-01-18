@@ -1,1 +1,0 @@
-sudo docker run -it git.jinr.ru:5005/baikal/generators:latest
