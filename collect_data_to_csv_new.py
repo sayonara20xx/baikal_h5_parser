@@ -3,12 +3,9 @@
 # default out directory name is "cvs_data"
 # info in csv's ready for import with `Pandas` lib, you can use `to_numpy` func
 
-# todo: надо вытащить другие данные и по другому
-# каждое срабатывание пробки - один фп для нейронки
-# вместо хуз каскада надо относительное местоположение относительно пробки
-# нужно найти способ расчитать его (по номеру пробки получить его zyz и посчитать)#
-
+from importlib import import_module
 import h5py
+import functools
 import time
 import pandas as pd
 import numpy as np
@@ -78,6 +75,7 @@ def read_info_from_hdf5(filename : str, required_input_info : list, required_out
 
 
 def read_events_from_hdf5(filename : str, required_input_info : list, required_output_info : list):
+    get_unified_prob = True
 
     try:
         info_file = h5py.File(filename)
@@ -87,12 +85,61 @@ def read_events_from_hdf5(filename : str, required_input_info : list, required_o
 
     for key in info_file:
         if ("event" in key):
+            
             current_hit_coords = None
+            
+            activation_time = None
+            activation_prob = None
+
+            particle_rel_coords = None
+            particle_direction_vec = None
+            particle_energy = None
+
             if ("hits" in info_file[key].keys()):
                 on_hits_detectors = info_file[key]["hits"]
                 
-                for current_det_hit in on_hits_detectors:
-                    print(on_hits_detectors[current_det_hit].shape)
+                for current_det_hits in on_hits_detectors:
+                    current_det_data = on_hits_detectors[current_det_hits]["data"]
+                    
+                    for current_hit in current_det_data:
+                        current_hit_coords = current_hit[5:8]
+                        #print(current_hit_coords)
+
+                        activation_time = current_hit[0]
+                        activation_prob = current_hit[1:4]
+
+                        output_sample = []
+                        output_sample.append(activation_time)
+                        if (get_unified_prob):
+                            probs_multiplication = functools.reduce(lambda a, b: a*b, activation_prob)
+                            output_sample.append(probs_multiplication)
+                            #print(probs_multiplication)
+                        else:
+                            for prob in activation_prob:
+                                output_sample.append(prob)
+                        
+                        event_vertex = info_file[key]['event_header']['vertices']['vertex0']
+                        # get location
+                        location_info = event_vertex["pos"][0:3]
+                        # get energy
+                        particle_energy = event_vertex["in_particles"]["particle0"][4]
+                        # get direction
+                        particle_direction = event_vertex["in_particles"]["particle0"][1:4]
+
+                        # get relative location
+                        rel_loc_info = location_info - current_hit_coords
+                        
+                        #print(location_info)
+                        #print(current_hit_coords)
+                        #print(location_info - current_hit_coords)
+
+                        input_sample = [*rel_loc_info, *particle_direction, particle_energy]
+
+                        #print(input_sample)
+                        #print(output_sample)
+
+                        required_input_info.append(input_sample)
+                        required_output_info.append(output_sample)
 
 
 def save_to_dataframe_csv(filename_1 : str, filename_2 : str, input_samples_list : list, output_samples_list : list):
@@ -132,5 +179,5 @@ if (__name__ == "__main__"):
         default_input_data_csv_filename = default_out_folder + "/input-{}".format(time_stamp) + str(iteration_num) + ".csv"
         default_output_data_csv_filename = default_out_folder + "/output-{}".format(time_stamp) + str(iteration_num) + ".csv"
     
-        #save_to_dataframe_csv(default_input_data_csv_filename, default_output_data_csv_filename,
-        #                      required_input_info, required_output_info)
+        save_to_dataframe_csv(default_input_data_csv_filename, default_output_data_csv_filename,
+                              required_input_info, required_output_info)
