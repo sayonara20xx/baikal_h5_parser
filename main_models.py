@@ -80,16 +80,18 @@ def first_model():
     validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
 
     model.compile(
-    optimizer=Adam(learning_rate=0.0005, beta_1=0.93, beta_2=0.999),
+    optimizer=Adam(learning_rate=0.00025, beta_1=0.93, beta_2=0.999),
     loss=MeanSquaredError(reduction="auto", name="mean_squared_error")
     )
 
     history = model.fit(
     x_train,
     y_train,
-    epochs=100,
+    epochs=250,
     validation_data=(x_val, y_val),
     )
+
+    print(model.predict([[0, 0, 0, 0, 0, 0, 1]]))
 
 
 if __name__ == "__main__":
