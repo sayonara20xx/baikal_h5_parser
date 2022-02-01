@@ -16,6 +16,30 @@ import numpy as np
 # model.predict_classes([[{your_input_data}]]) # param should be list of lists or 2dim ndarray
 # or just add at the required place in source file
 
+
+def load_multiple_csvs(input_data : list, output_data : list, default_csv_data_folder : str = "./csv_data"):
+    '''
+        returns nothing!\n
+        fill two input arrays with data, packs it into list, use [0]
+    '''
+    import os
+    csvs_filenames = os.listdir(default_csv_data_folder)
+    
+    input_numpy_arrays = []
+    output_numpy_arrays = []
+    for csv_filename in csvs_filenames:
+        relative_path = default_csv_data_folder + "/" + csv_filename
+        if ("input" in csv_filename):
+            current_array = load_data_from_csv(relative_path)
+            input_numpy_arrays.append(current_array)
+        elif ("output" in csv_filename):
+            current_array = load_data_from_csv(relative_path)
+            output_numpy_arrays.append(current_array)
+
+    input_data.append(np.concatenate(input_numpy_arrays))
+    output_data.append(np.concatenate(output_numpy_arrays))
+
+
 def normalize_data(data_samples_list : np.array):
     # у значений вероятности очень больной разброс значений даже после такой нормализации
     # возможно, нужен совсем другой способ
@@ -36,6 +60,7 @@ def load_data_from_csv(filename : str):
     data_frame = pd.read_csv(filename, index_col=0)
     return data_frame.to_numpy()
 
+
 def validate_shapes(x_train, y_train, x_val, y_val, verbose=1):
     if (verbose == 1):
         print(x_train.shape)
@@ -52,25 +77,28 @@ def validate_shapes(x_train, y_train, x_val, y_val, verbose=1):
         print(x_val)
         print(y_val)
 
+
+def split_dataset(input_data : np.array, output_data : np.array, ratio : float = 0.9):
+    split_idx = int(len(input_data)*ratio)
+    #print(split_idx)
+    return (input_data[:split_idx], output_data[:split_idx], input_data[split_idx:], output_data[split_idx:])
+
+
 def first_model():
-    default_csv_data_folder = "./baikal_h5_parser/csv_data"
+    input_data = []
+    output_data = []
 
-    input_data = load_data_from_csv(default_csv_data_folder + "/input-16424656810.csv")
-    output_data = load_data_from_csv(default_csv_data_folder + "/output-16424656810.csv")
+    load_multiple_csvs(input_data, output_data)
 
-    # захардкожено
-    x_train = input_data[:50]
-    y_train = output_data[:50]
-
-    x_val = input_data[50:]
-    y_val = output_data[50:]
+    x_train, y_train, x_val, y_val = split_dataset(input_data[0], output_data[0], ratio=0.8)
 
     model = Sequential()
-    model.add(layers.Dense(250, activation=activations.selu, input_shape=(7,)))
+    model.add(layers.Dense(500, activation=activations.selu, input_shape=(7,)))
+    model.add(layers.Dense(350, activation=activations.sigmoid, input_shape=(7,)))
     model.add(layers.Dense(2, activation=activations.tanh))
     model.summary()
 
-    validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
+    #validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
 
     # нормализация здесь нужна 100%
     # найти медиану и макс/мин значения, можно с помощью либ
@@ -80,15 +108,17 @@ def first_model():
     validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
 
     model.compile(
-    optimizer=Adam(learning_rate=0.00025, beta_1=0.93, beta_2=0.999),
+    optimizer=Adam(learning_rate=0.0000025, beta_1=0.93, beta_2=0.999),
     loss=MeanSquaredError(reduction="auto", name="mean_squared_error")
     )
 
     history = model.fit(
     x_train,
     y_train,
-    epochs=250,
+    epochs=5000,
     validation_data=(x_val, y_val),
+    batch_size=1,
+    shuffle=True
     )
 
     print(model.predict([[0, 0, 0, 0, 0, 0, 1]]))
