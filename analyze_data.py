@@ -72,7 +72,7 @@ def main():
     input_data = []
     output_data = []
 
-    load_multiple_csvs(input_data, output_data)
+    load_multiple_csvs(input_data, output_data, default_csv_data_folder="./csv_data/det_direction_check")
 
     input_data_swapped = input_data[0].swapaxes(0,1)
     output_data_swapped = output_data[0].swapaxes(0,1)

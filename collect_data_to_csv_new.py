@@ -170,7 +170,7 @@ if (__name__ == "__main__"):
     for (iteration_num, current_filename) in zip(range(len(h5_filenames_list)), h5_filenames_list):
         required_input_info = []
         required_output_info = []
-        
+
         current_relative_filename = default_data_folder_name + "/" + current_filename
         print("current h5 file relative name is {}".format(current_relative_filename))
         read_events_from_hdf5(current_relative_filename, required_input_info, required_output_info)
