@@ -94,7 +94,8 @@ def first_model():
 
     model = Sequential()
     model.add(layers.Dense(500, activation=activations.selu, input_shape=(7,)))
-    model.add(layers.Dense(350, activation=activations.sigmoid, input_shape=(7,)))
+    model.add(layers.Dense(350, activation=activations.sigmoid))
+    model.add(layers.Dense(150, activation=activations.tanh))
     model.add(layers.Dense(2, activation=activations.tanh))
     model.summary()
 
@@ -108,7 +109,7 @@ def first_model():
     validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
 
     model.compile(
-    optimizer=Adam(learning_rate=0.0000025, beta_1=0.93, beta_2=0.999),
+    optimizer=Adam(learning_rate=0.00005, beta_1=0.93, beta_2=0.999),
     loss=MeanSquaredError(reduction="auto", name="mean_squared_error")
     )
 
