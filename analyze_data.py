@@ -4,6 +4,7 @@
 
 
 from functools import reduce
+from typing import Counter
 import numpy as np
 from numpy.lib.index_tricks import s_
 
@@ -81,13 +82,32 @@ def main():
     build_histogram(input_data_swapped[0], n_bins=100, title="rel_pos_x")
     build_histogram(input_data_swapped[1], n_bins=100, title="rel_pos_y")
     build_histogram(input_data_swapped[2], n_bins=100, title="rel_pos_z")
-    build_histogram(input_data_swapped[3], n_bins=100, title="direct_x")
-    build_histogram(input_data_swapped[4], n_bins=100, title="direct_y")
-    build_histogram(input_data_swapped[5], n_bins=100, title="direct_z")
-    build_histogram(input_data_swapped[6], n_bins=100, title="energy")
+    #build_histogram(input_data_swapped[3], n_bins=100, title="direct_x")
+    #build_histogram(input_data_swapped[4], n_bins=100, title="direct_y")
+    #build_histogram(input_data_swapped[5], n_bins=100, title="direct_z")
+    #build_histogram(input_data_swapped[6], n_bins=100, title="energy")
 
-    build_histogram(output_data_swapped[0], n_bins=100, title="activation_time")
+    #build_histogram(output_data_swapped[0], n_bins=100, title="activation_time")
     build_histogram(output_data_swapped[1], n_bins=150, title="probability", param_range=(10e-6, 0.2))
+
+    # очень кустарный метод расчёта степени логарифма числа
+    # был бы здесь другой способ боже
+    get_loga = output_data_swapped[1]
+    logas = []
+    for num in get_loga:
+        string_num = "{:.50f}".format(float(num))
+        cc = 0
+        for c in string_num:
+            if (c == '0' or c == '.'):
+                cc += 1
+            else:
+                break
+        
+        #print(num)
+        #print(cc - 1)
+        logas.append(cc - 1)
+
+    build_histogram(np.array(logas), n_bins=25, title="probability_exp",  param_range=(6, 0))
 
     #print(len(input_data_swapped[0]))
 
