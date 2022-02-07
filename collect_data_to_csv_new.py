@@ -3,7 +3,6 @@
 # default out directory name is "cvs_data"
 # info in csv's ready for import with `Pandas` lib, you can use `to_numpy` func
 
-from importlib import import_module
 import h5py
 import functools
 import time
