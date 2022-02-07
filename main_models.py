@@ -109,7 +109,7 @@ def first_model():
     validate_shapes(x_train, y_train, x_val, y_val, verbose=1)
 
     model.compile(
-    optimizer=Adam(learning_rate=0.00005, beta_1=0.93, beta_2=0.999),
+    optimizer=Adam(learning_rate=0.000001, beta_1=0.93, beta_2=0.999),
     loss=MeanSquaredError(reduction="auto", name="mean_squared_error")
     )
 
