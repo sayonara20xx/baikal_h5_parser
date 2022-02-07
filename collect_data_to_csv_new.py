@@ -174,6 +174,8 @@ if (__name__ == "__main__"):
         print("current h5 file relative name is {}".format(current_relative_filename))
         read_events_from_hdf5(current_relative_filename, required_input_info, required_output_info)
 
+        # please, do not change filenames building logic
+        # timestamps helps make (input-output) pair using idx after concat
         time_stamp = int(time.time())
         default_input_data_csv_filename = default_out_folder + "/input-{}".format(time_stamp) + str(iteration_num) + ".csv"
         default_output_data_csv_filename = default_out_folder + "/output-{}".format(time_stamp) + str(iteration_num) + ".csv"

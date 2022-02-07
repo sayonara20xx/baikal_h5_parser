@@ -55,6 +55,7 @@ def normalize_data(data_samples_list : np.array):
 
     print(data_array_collumns.swapaxes(0,1))
 
+
 def load_data_from_csv(filename : str):
     # loading and returning ndarray type
     data_frame = pd.read_csv(filename, index_col=0)
