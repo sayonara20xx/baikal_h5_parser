@@ -1,12 +1,13 @@
-# small utility file
-# very omnious concat method
-# i think it should be made using pairs not whole collection
+# new concat method for 3dim data
 
-# TODO - perform reading csvs but without cc-*.csv files (which already concated)
+# На будущее: вместо cvs надо было использовать pickle и DataFrame.to_pickle()
 
+import os
 import numpy as np
 import pandas as pd
 import time
+
+from ast import literal_eval
 
 def load_data_from_csv(filename : str):
     # loading and returning ndarray type
@@ -38,14 +39,8 @@ def load_multiple_csvs(input_data : list, output_data : list, default_csv_data_f
 
 
 def save_to_dataframe_csv(filename_1 : str, filename_2 : str, input_samples_list : list, output_samples_list : list):
-    input_data_col_labels = ["rel_pos_x", "rel_pos_y", "rel_pos_z", 
-                             "direct_x", "direct_y", "direct_z", 
-                             "Energy"]
-
-    output_data_col_labels = ["time_0", "activation_probability"]
-
-    input_data_df = pd.DataFrame(input_samples_list, columns=input_data_col_labels)
-    output_data_df = pd.DataFrame(output_samples_list, columns=output_data_col_labels)
+    input_data_df = pd.DataFrame(input_samples_list)
+    output_data_df = pd.DataFrame(output_samples_list)
 
     input_data_df.to_csv(filename_1)
     output_data_df.to_csv(filename_2)
@@ -61,11 +56,44 @@ def main():
     input_data = []
     output_data = []
 
-    default_out_folder = "./csv_data"
-    load_multiple_csvs(input_data, output_data, default_csv_data_folder=default_out_folder)
+    default_out_folder = "./concated_data"
 
-    # please, do not change filenames building logic
-    # timestamps helps make (input-output) pair using idx after concat
+    try:
+        os.mkdir(default_out_folder)
+    except FileExistsError:
+        pass
+
+    load_multiple_csvs(input_data, output_data)
+
+    print(np.array(input_data[0]).shape)
+    #print(len(input_data))
+    #print(len(input_data[0]))
+    #print(len(input_data[0][1]))
+    #result = input_data[0][1][0].strip('][').split(", ")
+    #result = map(lambda x: float(x), result)
+    #print(list(result))
+
+    if (False):
+        for sample in input_data[0][:1]:
+            for current_detector_data in sample:
+                # looks preety hard
+                # just transforming list string representation into actual list of floats
+                # i dont know the reason, but there are strings saved in .csv
+                print(list(map(lambda x: float(x), current_detector_data.strip('][').split(", "))))
+
+                # better use this
+                print(literal_eval(current_detector_data))
+
+        for sample in output_data[0][:100]:
+            for current_detector_data in sample:
+                if ('array' in current_detector_data):
+                    temp_string = current_detector_data.strip('][)').split(", array([")
+                    print([temp_string[0], *temp_string[1].split(", ")])
+                else:
+                    print(pd.eval(current_detector_data))
+
+
+    #print(len(input_data[0][0]))
     time_stamp = int(time.time())
     default_input_data_csv_filename = default_out_folder + "/cc_input-{}".format(time_stamp) + ".csv"
     default_output_data_csv_filename = default_out_folder + "/cc_output-{}".format(time_stamp) + ".csv"
