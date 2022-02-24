@@ -2,10 +2,11 @@
 # very omnious concat method
 # i think it should be made using pairs not whole collection
 
+# TODO - perform reading csvs but without cc-*.csv files (which already concated)
+
 import numpy as np
 import pandas as pd
 import time
-
 
 def load_data_from_csv(filename : str):
     # loading and returning ndarray type
@@ -60,7 +61,7 @@ def main():
     input_data = []
     output_data = []
 
-    default_out_folder = "./concated_data"
+    default_out_folder = "./csv_data"
     load_multiple_csvs(input_data, output_data, default_csv_data_folder=default_out_folder)
 
     # please, do not change filenames building logic

@@ -15,5 +15,5 @@ sudo docker container stop baikal_gen_auto
 sudo docker container rm baikal_gen_auto
 
 echo "extracting required data and clearing storage space..."
-python3 extract_data.py
+python3 collect_data_to_csv_new.py
 sudo rm -f ./h5_coll/*
