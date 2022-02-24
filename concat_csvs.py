@@ -2,6 +2,8 @@
 # very omnious concat method
 # i think it should be made using pairs not whole collection
 
+# TODO - perform reading csvs but without cc-*.csv files (which already concated)
+
 import numpy as np
 import pandas as pd
 import time

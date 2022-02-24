@@ -71,7 +71,7 @@ def main():
     input_data = []
     output_data = []
 
-    load_multiple_csvs(input_data, output_data, default_csv_data_folder="./csv_data/det_direction_check2")
+    load_multiple_csvs(input_data, output_data, default_csv_data_folder="./csv_data")
 
     input_data_swapped = input_data[0].swapaxes(0,1)
     output_data_swapped = output_data[0].swapaxes(0,1)
@@ -80,9 +80,9 @@ def main():
     build_histogram(input_data_swapped[0], n_bins=100, title="rel_pos_x")
     build_histogram(input_data_swapped[1], n_bins=100, title="rel_pos_y")
     build_histogram(input_data_swapped[2], n_bins=100, title="rel_pos_z")
-    #build_histogram(input_data_swapped[3], n_bins=100, title="direct_x")
-    #build_histogram(input_data_swapped[4], n_bins=100, title="direct_y")
-    #build_histogram(input_data_swapped[5], n_bins=100, title="direct_z")
+    build_histogram(input_data_swapped[3], n_bins=100, title="direct_x")
+    build_histogram(input_data_swapped[4], n_bins=100, title="direct_y")
+    build_histogram(input_data_swapped[5], n_bins=100, title="direct_z")
     #build_histogram(input_data_swapped[6], n_bins=100, title="energy")
 
     #build_histogram(output_data_swapped[0], n_bins=100, title="activation_time")
