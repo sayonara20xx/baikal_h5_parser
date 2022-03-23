@@ -73,6 +73,8 @@ def main():
     #result = map(lambda x: float(x), result)
     #print(list(result))
 
+    # Надеюсь я правильно помню, что ниже я пытался парсить 3-хмерные
+    # данные из .csv, где списки по двум измерениям сохранялись в виде строки
     if (False):
         for sample in input_data[0][:1]:
             for current_detector_data in sample:
