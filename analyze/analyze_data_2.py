@@ -2,6 +2,7 @@
 # гистограммы для всех значений вероятности и времени срабатывания, как начало
 # потом их же, но после нормализации
 
+from cmath import nan
 import numpy as np
 
 
@@ -65,12 +66,16 @@ def main():
     load_multiple_csvs(sample_data, default_csv_data_folder="./csv_data")
     sample_data = sample_data[0]
 
+    for (i, sample) in zip(range(len(sample_data)), sample_data):
+        if (not np.isnan(sample[4])):
+            print(sample[4], sample[5], i)
+
     sample_data_swaped = sample_data.swapaxes(0, 1)
     # print(len(sample_data_swaped[0])) # ok
 
     data_cols_labels = ["target_det", "z", "rho", "theta", "phi"]
-    for (col_label, i) in zip(data_cols_labels, range(len(data_cols_labels))):
-        build_histogram(sample_data_swaped[i], n_bins=100, title=col_label)
+    #for (col_label, i) in zip(data_cols_labels, range(len(data_cols_labels))):
+    #    build_histogram(sample_data_swaped[i], n_bins=100, title=col_label)
 
     spec_data_cols_labels = {5 : "activation_time", 6: "probs_mult"}
 

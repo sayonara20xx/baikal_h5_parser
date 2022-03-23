@@ -15,5 +15,5 @@ sudo docker container stop baikal_gen_auto
 sudo docker container rm baikal_gen_auto
 
 echo "extracting required data and clearing storage space..."
-python3 create_dataset.py
+python3 create_dataset_ext.py
 sudo rm -f ./h5_coll/auto_events_${1}.h5

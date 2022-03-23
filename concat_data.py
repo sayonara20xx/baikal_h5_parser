@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import time
 
-# concat ALL files from folder 'csv_data' excluding files from child folders
+# concat ALL files from folder 'csv_data' EXCLUDING files from child folders
 
 def load_data_from_csv(filename : str):
     # loading and returning ndarray type

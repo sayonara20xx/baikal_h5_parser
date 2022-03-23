@@ -7,6 +7,9 @@
 
     do not forget also add according col label in .csv file
     ('save_to_dataframe_csv' method)
+
+    ext means this scripts writes additional columns for data
+    analysis
 '''
 
 from math import acos, sqrt
@@ -20,9 +23,10 @@ import os
 
 from detector_helper import get_det_coords, get_nearest_det
 
+DETECTORS_COUNT = 864
 
 def fill_template(template : list):
-    for i in range(876):
+    for i in range(DETECTORS_COUNT):
         template.append([-1, -1, -1, -1, 
                          -1, -1, -1, -1])
 
@@ -121,10 +125,13 @@ def read_hdf5(filename : str, samples_list : list):
             # so on each event we create this list
             detectors_template = []
             fill_template(detectors_template)
+    
+            # saving ids of activated dets
+            mentioned_dets = []
 
             if ("hits" in info_file[key].keys()):
                 on_hits_detectors = info_file[key]["hits"]
-                
+
                 for current_det_hits in on_hits_detectors:
                     current_det_data = on_hits_detectors[current_det_hits]["data"]
                     
@@ -139,12 +146,18 @@ def read_hdf5(filename : str, samples_list : list):
                         if (get_unified_prob):
                             probs_multiplication = functools.reduce(lambda a, b: a*b, activation_prob)
 
-                        if (probs_multiplication > probability_edge):
+                        # '< 1' part is required because of ultra-rare bag when prob_,ult can reach 10^728 (1 case among 172_000 samples)
+                        # i don't know how
+                        if (probs_multiplication > probability_edge and probs_multiplication < 1):
                             activation_time = current_hit[0]
 
                             # using assist method below to specify which det was activated
                             # unfortunately, no data about det is stored inside h5 files 
                             target_det = get_nearest_det(detectors_coords_list, {"x": hit_coords[0], "y": hit_coords[1], "z": hit_coords[2]})
+
+                            # adding current det in list
+                            if (target_det not in mentioned_dets):
+                                mentioned_dets.append(target_det)
 
                             # but we have data about detectors space location
                             # using hit and dets coords we able to specify det id we are looking for
@@ -164,7 +177,23 @@ def read_hdf5(filename : str, samples_list : list):
                             # appending dataset with new row
                             # adding new values also require adding new collumn label in saving method
                             samples_list.append([z, rho, theta, phi, activation_time, probs_multiplication,
-                                                 target_det])
+                                                 target_det, *particle_direction, *location_info])
+
+            # loop works for each 'event' in h5 dataset
+            for det_id in range(DETECTORS_COUNT):
+                if (det_id not in mentioned_dets):
+                    # writing same data for each unactivated det excludint act_time and probs_mult
+                    det_center_coords = list(detectors_coords_list[det_id].values())
+
+                    # these values don't requre hit info
+                    phi = get_phi(det_center_coords, location_info, particle_direction)
+                    rho = get_rho(det_center_coords, location_info)
+                    theta = get_theta(particle_direction)
+                    z = get_z(det_center_coords, location_info)
+                    
+                    # append same way
+                    samples_list.append([z, rho, theta, phi, None, None,
+                                         det_id, *particle_direction, *location_info])
 
 
 def debug_print(sample_list : list):
@@ -174,8 +203,12 @@ def debug_print(sample_list : list):
 
 def save_to_dataframe_csv(filename : str, samples_list : list):
     data_cols_labels = ["z", "rho", "theta", 
-                        "phi", "activation_time", "probs_mult"
-                        "targer_det"]
+                        "phi", "activation_time", "probs_mult",
+                        "targer_det", "x_dir", "y_dir", "z_dir", "x_loc", "y_loc", "z_loc"]
+
+    print(samples_list[0])
+    print(len(samples_list[0]))
+    print(len(data_cols_labels))
 
     data_df = pd.DataFrame(samples_list, columns=data_cols_labels)
     data_df.to_csv(filename)
@@ -193,5 +226,9 @@ if (__name__ == "__main__"):
         current_relative_filename = default_data_folder_name + "/" + current_filename
         print("current h5 file relative name is {}".format(current_relative_filename))
         read_hdf5(current_relative_filename, sample_info)
+        
+        time_stamp = int(time.time())
+        default_data_csv_filename = default_out_folder + "/dataset-{}".format(time_stamp) + str(iteration_num) + ".csv"
+        save_to_dataframe_csv(default_data_csv_filename, sample_info)
 
         #debug_print(sample_info)
