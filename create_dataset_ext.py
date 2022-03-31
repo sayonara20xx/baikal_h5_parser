@@ -206,9 +206,9 @@ def save_to_dataframe_csv(filename : str, samples_list : list):
                         "phi", "activation_time", "probs_mult",
                         "targer_det", "x_dir", "y_dir", "z_dir", "x_loc", "y_loc", "z_loc"]
 
-    print(samples_list[0])
-    print(len(samples_list[0]))
-    print(len(data_cols_labels))
+    #print(samples_list[0])
+    #print(len(samples_list[0]))
+    #print(len(data_cols_labels))
 
     data_df = pd.DataFrame(samples_list, columns=data_cols_labels)
     data_df.to_csv(filename)
