@@ -43,10 +43,16 @@ def save_to_dataframe_csv(sample_data : list, default_out_data_folder : str = ""
 
 
 def filter_csv_data(sample_data : list):
-    for (i, sample) in zip(range(len(sample_data)), sample_data):
-        if (sample[6] >= 1.0):
-            sample_data.pop(i)
-            i -= 1
+    anomaly_counter = 0
+
+    for i in  range(len(sample_data)):
+        if (sample_data[i][6] >= 1):
+            anomaly_counter += 1
+
+            sample_data[i][5] = -1
+            sample_data[i][6] = -1
+
+    print("There were an {} bad values!".format(anomaly_counter))
 
 
 def main():
@@ -54,7 +60,7 @@ def main():
     csv_filenames_list = os.listdir(default_data_folder)
 
     for filename in csv_filenames_list:
-        if ("aaa" in filename):
+        if ("dataset" in filename):
             current_file_fullname = default_data_folder + "/" + filename
             data_samples = load_data_from_csv(current_file_fullname)
             filter_csv_data(data_samples)
