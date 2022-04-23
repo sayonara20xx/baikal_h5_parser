@@ -1,0 +1,30 @@
+/control/verbose 0
+/run/verbose 0
+/tracking/verbose 0
+
+/process/optical/processActivation Cerenkov True
+/process/optical/processActivation OpAbsorption True
+/process/optical/processActivation OpRayleigh True
+/process/optical/processActivation OpMieHG False
+/process/optical/processActivation Cerenkov True
+/process/optical/cerenkov/setStackPhotons True
+/process/em/verbose 0
+
+/run/initialize
+
+/gps/particle e-
+/gps/energy 1 GeV
+/gps/position 0 0 0 m
+/gps/pos/type Volume
+/gps/pos/centre 0 0 300 m
+/gps/pos/shape Cylinder
+/gps/pos/radius 2000 m
+/gps/pos/halfz 250 m
+/gps/ang/type iso
+
+/LiGen/output/store_photons 1
+/LiGen/output/store_histos 0
+/LiGen/output/photon_suppression_factor 1
+
+/run/printProgress 10
+/run/beamOn 50

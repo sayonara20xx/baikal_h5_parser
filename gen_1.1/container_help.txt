@@ -1,0 +1,14 @@
+--- run modulation ---
+cd packages/chains
+python3 simGVD.py --primary_config=configs/g4particlePrimary.conf --g4particle_macro=ligen.mac --n_events=10
+
+--- files paths ---
+
+- .py file we need to run -
+/generators/packages/chains/simGVD.py
+
+- .mac we need to change (mv into containet actually) -
+/generators/packages/chains/ligen.mac
+
+- output .h5 file -
+/
