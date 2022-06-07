@@ -5,11 +5,12 @@
     if new data is needed, add new columns in list,
     which `samples_list.append` refer
 
-    do not forget also add according col label in .csv file
-    ('save_to_dataframe_csv' method)
+    output format:
+    [z, rho, theta, phi, probability, det_number]
 '''
 
 from math import acos, sqrt
+import string
 import h5py
 import functools
 import time
@@ -86,7 +87,7 @@ def get_theta(cascade_vec : list):
 
 def read_hdf5(filename : str, samples_list : list):
     get_unified_prob = True
-    probability_edge = 1*10e-20
+    probability_edge = 1*10e-40
 
     # determining if file exists
     try:
@@ -109,7 +110,7 @@ def read_hdf5(filename : str, samples_list : list):
             event_vertex = info_file[key]['event_header']['vertices']['vertex0']
             
             # get info from vertex
-            location_info = event_vertex["pos"][0:3]
+            location_info = event_vertex["pos"][0:3][0]
             particle_energy = event_vertex["out_particles"][0][4]
             particle_direction = list(event_vertex["out_particles"][0])[1:4]
 
@@ -119,7 +120,7 @@ def read_hdf5(filename : str, samples_list : list):
                 event_hits = info_file[key]["hits"]["data"]
                 
                 for current_hit in event_hits:
-                    current_hit_info = list(current_hit)[0]
+                    current_hit_info = list(current_hit)
                     
                     on_hit_det_id = current_hit_info[0]
                     hit_time = current_hit_info[3]
@@ -146,14 +147,15 @@ def read_hdf5(filename : str, samples_list : list):
                     det_center_coords = list(detectors_coords_list[det_id].values())
 
                     # these values don't requre hit info
-                    phi = get_phi(hit_coords, location_info, particle_direction)
-                    rho = get_rho(hit_coords, location_info)
+                    phi = get_phi(det_center_coords, location_info, particle_direction)
+                    rho = get_rho(det_center_coords, location_info)
                     theta = get_theta(particle_direction)
-                    z = get_z(hit_coords, location_info)
+                    z = get_z(det_center_coords, location_info)
                     
                     # append same way
                     samples_list.append([z, rho, theta, phi, None,
                                          det_id])
+
 
 def debug_print(sample_list : list):
     for sample in sample_list:
@@ -169,19 +171,22 @@ def save_to_dataframe_csv(filename : str, samples_list : list):
     data_df.to_csv(filename)
 
 
-if (__name__ == "__main__"):
-    default_data_folder_name = "./h5_coll"
-    default_out_folder = "./csv_data"
-
-    h5_filenames_list = os.listdir(default_data_folder_name)
+def read_from_hdf5s_to_list(h5_folder_path : string, list_ref: list):
+    h5_filenames_list = os.listdir(h5_folder_path)
     h5_filenames_list = list(filter(lambda x : (".h5" in x), h5_filenames_list))
 
     # im getting current iteration number to make unique file names for sure 
     for (iteration_num, current_filename) in zip(range(len(h5_filenames_list)), h5_filenames_list):
-        sample_info = []
-
         current_relative_filename = default_data_folder_name + "/" + current_filename
         print("current h5 file relative name is {}".format(current_relative_filename))
-        read_hdf5(current_relative_filename, sample_info)
+        read_hdf5(current_relative_filename, list_ref)
 
-        #debug_print(sample_info)
+
+if (__name__ == "__main__"):
+    default_data_folder_name = "./h5_coll"
+    example_list = []
+
+    read_from_hdf5s_to_list(default_data_folder_name, example_list)
+    print(len(example_list))
+    debug_print(example_list[:10])
+    debug_print(example_list[1000:1010])

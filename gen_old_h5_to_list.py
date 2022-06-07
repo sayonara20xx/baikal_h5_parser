@@ -1,18 +1,9 @@
 '''
-    primary file which processes h5 files after model
-    working stage
-
-    if new data is needed, add new columns in list,
-    which `samples_list.append` refer
-
-    do not forget also add according col label in .csv file
-    ('save_to_dataframe_csv' method)
-
-    ext means this scripts writes additional columns for data
-    analysis
+    src file for extracting data to specified data coll
 '''
 
 from math import acos, sqrt
+import string
 import h5py
 import functools
 import time
@@ -109,8 +100,12 @@ def read_hdf5(filename : str, samples_list : list):
     detectors_coords_list = []
     get_det_coords(detectors_coords_list)
 
+    # for last columns: memorizing event num inside h5 file
+    events_counter = -1
+
     for key in info_file:
         if ("event" in key):
+            events_counter += 1
 
             # at `event_vertex` key data about cascade angle, energy and start pos is located
             event_vertex = info_file[key]['event_header']['vertices']['vertex0']
@@ -129,7 +124,13 @@ def read_hdf5(filename : str, samples_list : list):
             # saving ids of activated dets
             mentioned_dets = []
 
+            # memorize for each event if there any activations
+            is_event_hit = 0
+
             if ("hits" in info_file[key].keys()):
+                # if there any hits the whole event will have 1 class
+                is_event_hit = 1
+
                 on_hits_detectors = info_file[key]["hits"]
 
                 for current_det_hits in on_hits_detectors:
@@ -176,8 +177,8 @@ def read_hdf5(filename : str, samples_list : list):
 
                             # appending dataset with new row
                             # adding new values also require adding new collumn label in saving method
-                            samples_list.append([z, rho, theta, phi, activation_time, probs_multiplication,
-                                                 target_det, *particle_direction, *location_info])
+                            samples_list.append([z, rho, theta, phi, probs_multiplication,
+                                                 target_det])
 
             # loop works for each 'event' in h5 dataset
             for det_id in range(DETECTORS_COUNT):
@@ -192,8 +193,8 @@ def read_hdf5(filename : str, samples_list : list):
                     z = get_z(det_center_coords, location_info)
                     
                     # append same way
-                    samples_list.append([z, rho, theta, phi, None, None,
-                                         det_id, *particle_direction, *location_info])
+                    samples_list.append([z, rho, theta, phi, None,
+                                         det_id])
 
 
 def debug_print(sample_list : list):
@@ -201,34 +202,41 @@ def debug_print(sample_list : list):
         print(sample)
 
 
-def save_to_dataframe_csv(filename : str, samples_list : list):
-    data_cols_labels = ["z", "rho", "theta", 
-                        "phi", "activation_time", "probs_mult",
-                        "targer_det", "x_dir", "y_dir", "z_dir", "x_loc", "y_loc", "z_loc"]
-
-    #print(samples_list[0])
-    #print(len(samples_list[0]))
-    #print(len(data_cols_labels))
+def create_dataframe(samples_list : list):
+    data_cols_labels = ["z", "rho", "theta", "phi", "probs_mult",
+                        "n_det"]
 
     data_df = pd.DataFrame(samples_list, columns=data_cols_labels)
-    data_df.to_csv(filename)
+    return data_df
+
+
+def read_from_hdf5s_to_list(h5_folder_path : string, list_ref: list):
+    default_data_folder_name = h5_folder_path
+    h5_filenames_list = os.listdir(default_data_folder_name)
+    h5_filenames_list = list(filter(lambda x : (".h5" in x), h5_filenames_list))
+    
+    # get only digits and cast them to `int` for comparsion function
+    def comparsion_key(filename : str):
+        import re
+        return int(re.findall(r"\d+", filename)[0])
+    
+    # get h5 files sorted
+    h5_filenames_list.sort(key=comparsion_key)
+    #print(h5_filenames_list)
+
+    # iter number isnt neccessary, but looking pretty cool
+    for (iteration_num, current_filename) in zip(range(len(h5_filenames_list)), h5_filenames_list):
+        # assembly path to current file (folder + filename)
+        current_relative_filename = default_data_folder_name + "/" + current_filename
+        print("{}. current h5 file relative name is {}".format(iteration_num, current_relative_filename))
+        
+        read_hdf5(current_relative_filename, list_ref)
 
 
 if (__name__ == "__main__"):
     default_data_folder_name = "./h5_coll"
-    default_out_folder = "./csv_data"
-
-    h5_filenames_list = os.listdir(default_data_folder_name)
-    # im getting current iteration number to make unique file names for sure 
-    for (iteration_num, current_filename) in zip(range(len(h5_filenames_list)), h5_filenames_list):
-        sample_info = []
-
-        current_relative_filename = default_data_folder_name + "/" + current_filename
-        print("current h5 file relative name is {}".format(current_relative_filename))
-        read_hdf5(current_relative_filename, sample_info)
-        
-        time_stamp = int(time.time())
-        default_data_csv_filename = default_out_folder + "/dataset-{}".format(time_stamp) + str(iteration_num) + ".csv"
-        save_to_dataframe_csv(default_data_csv_filename, sample_info)
-
-        #debug_print(sample_info)
+    example_list = []
+    read_from_hdf5s_to_list(default_data_folder_name, example_list)
+    print(len(example_list))
+    debug_print(example_list[:10])
+    debug_print(example_list[1000:1010])

@@ -9,6 +9,3 @@ python3 simGVD.py --primary_config=configs/g4particlePrimary.conf --g4particle_m
 
 - .mac we need to change (mv into containet actually) -
 /generators/packages/chains/ligen.mac
-
-- output .h5 file -
-/
