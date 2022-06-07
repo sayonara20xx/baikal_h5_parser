@@ -22,7 +22,6 @@
 /gps/pos/halfz 250 m
 /gps/ang/type iso
 
-/LiGen/output/store_photons 1
 /LiGen/output/store_histos 0
 /LiGen/output/photon_suppression_factor 1
 
